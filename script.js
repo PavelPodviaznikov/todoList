@@ -18,7 +18,7 @@ $(document).ready(function() {
         }
         else{
         	undoneList[clickCounter] = $('#inputItem').val();
-	        $('#undone_tasks').append('<div class="item">' + undoneList[clickCounter] + '</div><hr>');
+	        $('#undone_tasks').append('<div class="item">' + undoneList[clickCounter] + '<hr class="inner_hr"></div>');
 	        $(this).data('counter', clickCounter+1);
 	    	$('#undone_tasks_counter').text(undoneList.length);
 	    	console.log($('#inputItem').val());
@@ -28,7 +28,7 @@ $(document).ready(function() {
         $('.item').remove();
         undoneList = [];
         doneList=[];
-        $('hr').remove();
+        $('.inner_hr').remove();
         $('#button').data('counter', 0);
     	done_counter=0;
     	$('#undone_tasks_counter').text(undoneList.length);
@@ -40,8 +40,11 @@ $(document).ready(function() {
         for(var i=0; i<undoneList.length; i+=1){
         	if(undoneList[i]===task){
         		doneList.push(undoneList[i]);
-        		undoneList.slice(i,1);
-        		$('#done_tasks').append('<div class="item">' + doneList[done_counter] + '</div><hr>');
+        		undoneList.splice(i,1);
+                $(this).remove();
+                $('#undone_tasks_counter').text(undoneList.length);
+                $('#button').data('counter', clickCounter-1);
+        		$('#done_tasks').append('<div class="item">' + doneList[done_counter] + '<hr class="inner_hr"></div>');
         		done_counter+=1;
 
         	}
