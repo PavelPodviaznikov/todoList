@@ -1,0 +1,36 @@
+<html>
+<head>
+	<title>ToDo List</title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+    <script type="text/javascript" src="script.js"></script>
+</head>
+<body>
+    <div id="container">
+    	<h2>TODO LIST</h2><hr>
+            <form name="checkListForm">
+                <input type="text" id="inputItem" placeholder="Input your tasks here"/>
+            </form>
+            <div id="button">Add task</div><br/>
+        <div class="tabs">
+            <ul class="tab-links">
+                <li class="active"><a href="#undone_tasks">Undone Tasks <span id="undone_tasks_counter"></span> </a></li>
+                <li><a href="#done_tasks">Done tasks <span id="done_tasks_counter"></span></a></li>
+            </ul>
+            <div class="tab-content">
+                <div id="undone_tasks" class="tab active">
+                    
+                </div>
+         
+                <div id="done_tasks" class="tab">
+                   
+                </div>
+            </div>
+        </div>
+        <div id="bottom_buttons">
+            <div id="delete_button">Delete All</div>
+        </div>
+        
+    </div>
+</body>
+</html>
