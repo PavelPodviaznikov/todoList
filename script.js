@@ -4,6 +4,7 @@ var clickCounter;
 var done_counter = 0;
 
 $(document).ready(function() {
+    //Работа табок
     $('.tabs .tab-links a').on('click', function(e)  {
         var currentAttrValue = $(this).attr('href');
         $('.tabs ' + currentAttrValue).siblings().slideUp(400);
@@ -11,6 +12,7 @@ $(document).ready(function() {
         $(this).parent('li').addClass('active').siblings().removeClass('active');
         e.preventDefault();
     });
+    //Добавление задания
     $('#button').data('counter', 0).click(function(){
         clickCounter = $(this).data('counter');
         if($('#inputItem').val()===""){
@@ -24,20 +26,22 @@ $(document).ready(function() {
             console.log($('#inputItem').val());
         } 
     });
+    //Удаление сделанных заданий
     $('#delete_button').on('click', function(){
         $('#done_tasks').empty('.item');
         doneList = [];
         $('#done_tasks_counter').text(doneList.length);
     });
+    //Определение сделанных заданий
     $(document).on('click','.item', function(){
         var task = $(this).text();
         for(var i=0; i<undoneList.length; i+=1){
             if(undoneList[i]===task){
-                doneList.push(undoneList[i]);
-                undoneList.splice(i,1);
-                $(this).remove();
+                doneList.push(task);
+                //undoneList.splice(i,1);
+                $(this).replaceWith('<div class="item"><strike>' + undoneList[i] + '</strike><hr class="inner_hr"></div>');
                 $('#undone_tasks_counter').text(undoneList.length);
-                $('#button').data('counter', clickCounter-1);
+                //$('#button').data('counter', clickCounter-1);
                 $('#done_tasks').append('<div class="item">' + doneList[done_counter] + '<hr class="inner_hr"></div>');
                 done_counter+=1;
             }
@@ -45,8 +49,4 @@ $(document).ready(function() {
         
         $('#done_tasks_counter').text(doneList.length);
     }); 
-    /*$('#counter_button').on('click', function(){
-        $('#done_tasks_counter').text(doneList.length);
-        $('#undone_tasks_counter').text(undoneList.length);
-    });*/
 });
