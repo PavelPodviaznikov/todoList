@@ -132,3 +132,25 @@ form {
         .tab.active {
             display:block;
         }
+#del_icon{
+    position: absolute;
+    right: 0;
+    height: 20px;
+    width: 20px;
+    display: inline-block;
+    text-align: center;
+    background-color:#FFAE73;
+    border-radius: 20px;
+}
+#del_icon:hover{
+    background-color: #FF4540;
+    cursor: pointer;
+}
+.item{
+    position: relative;
+    padding: 10px;
+}
+img{
+    height: 10px;
+    margin: 5 auto;
+}
