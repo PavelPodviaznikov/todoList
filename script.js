@@ -4,7 +4,9 @@ var clickCounter;
 var done_counter = 0;
 
 $(document).ready(function() {
-    $('#container').draggable();
+    $('#container').draggable({
+        revert: true
+  });
     //Работа табок
     $('.tabs .tab-links a').on('click', function(e)  {
         var currentAttrValue = $(this).attr('href');
