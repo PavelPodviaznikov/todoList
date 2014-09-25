@@ -35,6 +35,21 @@ $(document).ready(function() {
             $('#undone_tasks_counter').text(undoneList.length);
         } 
     });
+    $(document).keypress(function(e) {
+    if(e.which == 13) {
+        e.preventDefault();
+        clickCounter = undoneList.length;
+        if($('#inputItem').val()===""){
+             alert("Oops, try again!");
+        }
+        else{
+            undoneList[clickCounter] = $('#inputItem').val();
+            $('#undone_tasks').append('<div class="undone_item">' + undoneList[clickCounter] + '<div class="del_undone"><img src="img/delete-icon.png"></div></div>');
+            clickCounter=clickCounter+1;
+            $('#undone_tasks_counter').text(undoneList.length);
+        } 
+    }
+    });
     //Удаление сделанных заданий
     $('#delete_button').on('click', function(){
         $('#done_tasks').empty('.done_item');
