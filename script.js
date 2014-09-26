@@ -6,6 +6,7 @@ var fb = new Firebase("https://podviaznikovtodolist.firebaseio.com/");
 var undoneRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/undone");
 var doneRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/done");
 
+
 $(document).ready(function() {
     $('#container').draggable({
         revert: true
