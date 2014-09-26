@@ -2,13 +2,19 @@
 <head>
 	<title>ToDo List</title>
     <link rel="stylesheet" type="text/css" href="styles.css">
+    <script src="https://cdn.firebase.com/js/client/1.0.24/firebase.js"></script>
     <script type="text/javascript" src="jquery.js"></script>
     <script type="text/javascript" src="jquery/jquery-ui.js"></script>
     <script type="text/javascript" src="script.js"></script>
 </head>
 <body>
     <div id="container">
-    	<h2>TODO LIST</h2><hr>
+    	<div id="upper">
+            <h2>TODO LIST</h2>
+            <div id="save"><img src="img/save.png" alt="save"></div>
+            <div id="upload"><img src="img/upload.png" alt="download"></div>
+        </div>
+        <hr>
             <form name="checkListForm">
                 <input type="text" id="inputItem" placeholder="Input your tasks here"/>
             </form>

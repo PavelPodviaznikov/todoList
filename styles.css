@@ -18,6 +18,7 @@ body{
 }
 h2 {
     font-family:arial;
+    display: inline-block;
 }
 
 form {
@@ -173,4 +174,37 @@ img{
     display: inherit;
     height: 10px;
     margin: 5 auto;
+}
+#save{
+    position: absolute;
+    right: 20px;
+    top: 20px;
+}
+#upload{
+    position: absolute;
+    right: 50px;
+    top: 20px;
+}
+#upper{
+    position: relative;
+}
+#save img{
+    height: 20px;
+    width: 20px;
+    display: inline;
+    padding: 5px;
+    margin: 0 auto;
+}
+#save img:hover{
+    cursor: pointer;
+}
+#upload img{
+    height: 20px;
+    width: 20px;
+    display: inline;
+    padding: 5px;
+    margin: 0 auto;
+}
+#upload img:hover{
+    cursor: pointer;
 }

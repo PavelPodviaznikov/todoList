@@ -2,6 +2,9 @@ var doneList = [];
 var undoneList = [];
 var clickCounter;
 var done_counter = 0;
+var fb = new Firebase("https://podviaznikovtodolist.firebaseio.com/");
+var undoneRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/undone");
+var doneRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/done");
 
 $(document).ready(function() {
     $('#container').draggable({
@@ -33,10 +36,10 @@ $(document).ready(function() {
             $('#undone_tasks').append('<div class="undone_item">' + undoneList[clickCounter] + '<div class="del_undone"><img src="img/delete-icon.png"></div></div>');
             clickCounter=clickCounter+1;
             $('#undone_tasks_counter').text(undoneList.length);
+            $('#inputItem').val("");
         } 
     });
     $(document).keypress(function(e) {
-    
     if(e.which == 13) {
         e.preventDefault();
         clickCounter = undoneList.length;
@@ -48,6 +51,7 @@ $(document).ready(function() {
             $('#undone_tasks').append('<div class="undone_item">' + undoneList[clickCounter] + '<div class="del_undone"><img src="img/delete-icon.png"></div></div>');
             clickCounter=clickCounter+1;
             $('#undone_tasks_counter').text(undoneList.length);
+            $('#inputItem').val("");
         } 
     }
 });
@@ -57,6 +61,7 @@ $(document).ready(function() {
         doneList = [];
         done_counter = 0;
         $('#done_tasks_counter').text(doneList.length);
+        fb.child("done").remove();
     });
     //Определение сделанных заданий
     $(document).on('click','#undone_tasks .undone_item', function(){
@@ -84,5 +89,40 @@ $(document).ready(function() {
 
         $('#undone_tasks_counter').text(undoneList.length);
         $(this).parent().remove();
+    });
+    $('#save').on('click', function(){
+        fb.child("undone").remove();
+        fb.child("done").remove();
+        var undoneRef = fb.child("undone");
+        var doneRef = fb.child("done");
+        for(var i=0; i<undoneList.length; i+=1){
+            undoneRef.push({
+                task: undoneList[i]
+            });
+        }
+        for(var j = 0; j<doneList.length; j+=1){
+            doneRef.push({
+                task: doneList[j]
+            });
+        }
+    });
+    $('#upload').one('click', function(){
+        undoneRef.once('value', function(allUndoneSnap){
+            allUndoneSnap.forEach(function(undoneSnap){
+                 var undoneText = undoneSnap.child('task').val();
+                 undoneList.push(undoneText);
+                 $('#undone_tasks').append('<div class="undone_item">' + undoneText + '<div class="del_undone"><img src="img/delete-icon.png"></div></div>');
+                 $('#undone_tasks_counter').text(undoneList.length);
+            });
+        });
+        doneRef.once('value', function(allDoneSnap){
+            allDoneSnap.forEach(function(doneSnap){
+                 var doneText = doneSnap.child('task').val();
+                 doneList.push(doneText);
+                 $('#done_tasks').append('<div class="done_item">' + doneText + '</div>');
+                 $('#done_tasks_counter').text(doneList.length);
+            });
+        });
+
     });
 });
