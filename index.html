@@ -2,8 +2,8 @@
 <head>
 	<title>ToDo List</title>
     <link rel="stylesheet" type="text/css" href="styles.css">
+    <link rel="stylesheet" href="jquery-ui.css">
     <script src="https://cdn.firebase.com/js/client/1.0.24/firebase.js"></script>
-    <script src="https://cdn.firebase.com/js/simple-login/1.6.4/firebase-simple-login.js"></script>
     <script type="text/javascript" src="jquery.js"></script>
     <script type="text/javascript" src="jquery/jquery-ui.js"></script>
     <script type="text/javascript" src="script.js"></script>
@@ -31,10 +31,16 @@
                 </div>
             </div>
         </div>
+        <div id="dialog_container">
+            <div id="my_dialog" title="Attention!">
+                <p>Delete all?</p>
+                <div id="delete">Delete</div>
+                <div id="cancel">Cancel</div>
+            </div>
+        </div>
         <div id="bottom_buttons">
             <div id="delete_button">Delete All</div>
         </div>
-        
     </div>
 </body>
 </html>

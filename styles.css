@@ -208,8 +208,33 @@ img{
 #upload img:hover{
     cursor: pointer;
 }
-.ui-dialog-osx {
-    -moz-border-radius: 0 0 8px 8px;
-    -webkit-border-radius: 0 0 8px 8px;
-    border-radius: 0 0 8px 8px; border-width: 0 8px 8px 8px;
+#delete, #cancel{
+    height: 30px;
+width: 100px;
+background-color: yellow;
+border: 1px solid black;
+display: inline-block;
+cursor: pointer;
+border-radius: 5px;
+}
+#delete{
+    background-color: #cc0000;
+    color: white;
+}
+#cancel{
+    background-color: rgb(209, 211, 185);
+}
+#delete:hover{
+    background-color: #FF4540;
+    color: #FFCC73;
+}
+#cancel:hover{
+    background-color: rgb(117, 117, 111);
+    color: white;
+}
+#my_dialog{
+    text-align: center;
+}
+.ui-widget-header{
+    background: #cc0000;
 }

@@ -11,6 +11,9 @@ $(document).ready(function() {
     $('#container').draggable({
         revert: true
   });
+
+    $( "#my_dialog" ).dialog({ autoOpen: false });
+
     undoneRef.once('value', function(allUndoneSnap){
         allUndoneSnap.forEach(function(undoneSnap){
             var undoneText = undoneSnap.child('task').val();
@@ -82,11 +85,18 @@ $(document).ready(function() {
 });
     //Удаление сделанных заданий
     $('#delete_button').on('click', function(){
-        $('#done_tasks').empty('.done_item');
-        doneList = [];
-        done_counter = 0;
-        $('#done_tasks_counter').text(doneList.length);
-        fb.child("done").remove();
+       $( "#my_dialog" ).dialog( "open" );
+       $('#cancel').click(function(){
+            $( "#my_dialog" ).dialog( "close" );
+       });
+        $('#delete').click(function(){
+            $('#done_tasks').empty('.done_item');
+            doneList = [];
+            done_counter = 0;
+            $('#done_tasks_counter').text(doneList.length);
+            fb.child("done").remove();
+            $( "#my_dialog" ).dialog( "close" );
+        });    
     });
     //Определение сделанных заданий
     $(document).on('click','#undone_tasks .undone_item', function(){
