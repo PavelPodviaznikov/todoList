@@ -12,8 +12,6 @@ $(document).ready(function() {
         revert: true
   });
 
-    $( "#my_dialog" ).dialog({ autoOpen: false });
-
     undoneRef.once('value', function(allUndoneSnap){
         allUndoneSnap.forEach(function(undoneSnap){
             var undoneText = undoneSnap.child('task').val();
@@ -65,39 +63,42 @@ $(document).ready(function() {
     });
     //Добавления зажания ентером
     $(document).keypress(function(e) {
-    if(e.which == 13) {
-        e.preventDefault();
-        clickCounter = undoneList.length;
-        if($('#inputItem').val()===""){
-             alert("Oops, try again!");
+        if(e.which == 13) {
+            e.preventDefault();
+            clickCounter = undoneList.length;
+            if($('#inputItem').val()===""){
+                alert("Oops, try again!");
+            }
+            else{
+                undoneList[clickCounter] = $('#inputItem').val();
+                undoneRef.push({
+                    task: undoneList[clickCounter]
+                });
+                $('#undone_tasks').append('<div class="undone_item">' + undoneList[clickCounter] + '<div class="del_undone"><img src="img/delete-icon.png"></div></div>');
+                clickCounter=clickCounter+1;
+                $('#undone_tasks_counter').text(undoneList.length);
+                $('#inputItem').val("");  
+            }
         }
-        else{
-            undoneList[clickCounter] = $('#inputItem').val();
-            undoneRef.push({
-                task: undoneList[clickCounter]
-            });
-            $('#undone_tasks').append('<div class="undone_item">' + undoneList[clickCounter] + '<div class="del_undone"><img src="img/delete-icon.png"></div></div>');
-            clickCounter=clickCounter+1;
-            $('#undone_tasks_counter').text(undoneList.length);
-            $('#inputItem').val("");
-        } 
-    }
-});
+    });
     //Удаление сделанных заданий
     $('#delete_button').on('click', function(){
-       $( "#my_dialog" ).dialog( "open" );
-       $('#cancel').click(function(){
-            $( "#my_dialog" ).dialog( "close" );
-       });
-        $('#delete').click(function(){
-            $('#done_tasks').empty('.done_item');
-            doneList = [];
-            done_counter = 0;
-            $('#done_tasks_counter').text(doneList.length);
-            fb.child("done").remove();
-            $( "#my_dialog" ).dialog( "close" );
+            $('#dialog_container').css('display', 'block');
+            $('#my_dialog').css('display', 'block');
+            $('#delete').on('click', function(){
+               $('#done_tasks').empty('.done_item');
+                doneList = [];
+                done_counter = 0;
+                $('#done_tasks_counter').text(doneList.length);
+                fb.child("done").remove(); 
+                $('#dialog_container').css('display', 'none');
+                $('#my_dialog').css('display', 'none');
+            });
+            $('#cancel').on('click', function(){
+                $('#dialog_container').css('display', 'none');
+                $('#my_dialog').css('display', 'none');
+            });
         });    
-    });
     //Определение сделанных заданий
     $(document).on('click','#undone_tasks .undone_item', function(){
         done_counter=doneList.length;
