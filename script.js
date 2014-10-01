@@ -8,20 +8,13 @@ var fb = new Firebase("https://podviaznikovtodolist.firebaseio.com/");
 var undoneRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/undone");
 var doneRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/done");
 var allRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/all");
+var some;
 
 
 $(document).ready(function() {
     $('#container').draggable({
         revert: true
   });
-    allRef.once('value', function(allSnap){
-        allSnap.forEach(function(snapshot){
-            var allText = snapshot.child('task').val();
-            allList.push(allText);
-            $('#all_tasks').append('<div class="all_item">'+allText+'<div class="del_all"><img src="img/delete-icon.png"></div></div>');
-            $('#all_tasks_counter').text(allList.length);
-        });
-    });
     doneRef.once('value', function(allDoneSnap){
         allDoneSnap.forEach(function(doneSnap){
             var doneText = doneSnap.child('task').val();
@@ -30,11 +23,37 @@ $(document).ready(function() {
             $('#done_tasks_counter').text(doneList.length);
         });
     });
+    allRef.once('value', function(allSnap){
+        allSnap.forEach(function(snapshot){
+            var allText = snapshot.child('task').val();
+            allList.push(allText);
+            var some = false;
+            for(var i=0; i<allList.length; i+=1){
+                for(var j=0; j<doneList.length; j+=1){
+                    if(allList[i]===doneList[j]){
+                        some = true;
+                        break;
+                    }
+                    else{
+                        some = false;
+                    }
+                }
+            }
+            if(some){
+                $('#all_tasks').append('<div class="all_item striker">'+allText+'<div class="del_all"><img src="img/delete-icon.png"></div></div>');
+                some=false;
+            }
+            else{
+                $('#all_tasks').append('<div class="all_item">'+allText+'<div class="del_all"><img src="img/delete-icon.png"></div></div>');
+            }
+            $('#all_tasks_counter').text(allList.length);
+        });
+    });
     undoneRef.once('value', function(allUndoneSnap){
         allUndoneSnap.forEach(function(undoneSnap){
             var undoneText = undoneSnap.child('task').val();
             undoneList.push(undoneText);
-            $('#undone_tasks').append('<div class="undone_item">' + undoneText + '<div class="del_all"><img src="img/delete-icon.png"></div></div>');
+            $('#undone_tasks').append('<div class="undone_item">' + undoneText + '</div>');
             $('#undone_tasks_counter').text(undoneList.length);
         });
     });
@@ -80,7 +99,7 @@ $(document).ready(function() {
             undoneRef.push({
                 task: undoneList[undone_counter]
             });
-            $('#undone_tasks').append('<div class="undone_item">' + undoneList[undone_counter] + '<div class="del_all"><img src="img/delete-icon.png"></div></div>');
+            $('#undone_tasks').append('<div class="undone_item">' + undoneList[undone_counter] + '</div>');
             all_counter=all_counter+1;
             undone_counter=undone_counter+1;
             $('#all_tasks_counter').text(allList.length);
@@ -94,8 +113,17 @@ $(document).ready(function() {
             e.preventDefault();
             all_counter = allList.length;
             undone_counter = undoneList.length;
+            var isInList = false;
+            for(var i in allList){
+                if(allList[i]===$('#inputItem').val()){
+                    isInList = true;
+                }
+            }
             if($('#inputItem').val()===""){
                  alert("Oops, try again!");
+            }
+            else if(isInList){
+                alert("Oops, there is such task!");
             }
             else{
                 allList[all_counter] = $('#inputItem').val();
@@ -108,7 +136,7 @@ $(document).ready(function() {
                 undoneRef.push({
                     task: undoneList[undone_counter]
                 });
-                $('#undone_tasks').append('<div class="undone_item">' + undoneList[undone_counter] + '<div class="del_all"><img src="img/delete-icon.png"></div></div>');
+                $('#undone_tasks').append('<div class="undone_item">' + undoneList[undone_counter] + '</div>');
                 all_counter=all_counter+1;
                 undone_counter=undone_counter+1;
                 $('#all_tasks_counter').text(allList.length);
@@ -122,7 +150,25 @@ $(document).ready(function() {
             $('#dialog_container').css('display', 'block');
             $('#my_dialog').css('display', 'block');
             $('#delete').on('click', function(){
-               $('#done_tasks').empty('.done_item');
+                for(var i in allList){
+                    for(var j in doneList){
+                        if(allList[i]===doneList[j]){
+                            allList.splice(i,1);
+                        }
+                    }
+                }
+                allRef.remove();
+                for(var k=0; k<allList.length;k+=1){
+                    allRef.push({
+                        task: allList[k]
+                    }); 
+                }
+                $('#all_tasks').empty('.all_item');
+                for(var b=0; b<allList.length;b+=1){
+                     $('#all_tasks').append('<div class="all_item">' + allList[b] + '<div class="del_all"><img src="img/delete-icon.png"></div></div>');
+                }
+                $('#all_tasks_counter').text(allList.length);
+                $('#done_tasks').empty('.done_item');
                 doneList = [];
                 done_counter = 0;
                 $('#done_tasks_counter').text(doneList.length);
@@ -154,22 +200,35 @@ $(document).ready(function() {
         $('.undone_item').remove();
         undoneRef.remove();
         for(var k=0; k<undoneList.length; k+=1){
-            $('#undone_tasks').append('<div class="undone_item">' + undoneList[k] + '<div class="del_all"><img src="img/delete-icon.png"></div></div>');
+            $('#undone_tasks').append('<div class="undone_item">' + undoneList[k] + '</div>');
             undoneRef.push({
                 task: undoneList[k]
             });
         }
-        doneList.push(task);
-        doneRef.push({
-            task: doneList[done_counter]
-        });
-        $('#done_tasks').append('<div class="done_item">' + doneList[done_counter] + '</div>');
-        done_counter+=1;
-        $('#done_tasks_counter').text(doneList.length);
+        var isInList = false;
+        for(var m in doneList){
+            if(doneList[m]===task){
+                isInList=true;
+            }
+        }
+        if(isInList){
+            return;
+        }
+        else{
+            doneList.push(task);
+            doneRef.push({
+                task: doneList[done_counter]
+            });
+            $('#done_tasks').append('<div class="done_item">' + doneList[done_counter] + '</div>');
+            done_counter+=1;
+            $('#done_tasks_counter').text(doneList.length);
+        }
+        
     }); 
-    $('.all_item .striker').on('click', function(){
-        $(this).removeClass('striker');
-    });
+
+    /*$(document).on('click','.striker', function(){
+        
+    });*/
     //Удаление несделанных дел
     $(document).on('click', '.del_all', function(e){
         e.stopPropagation();
@@ -197,11 +256,31 @@ $(document).ready(function() {
         $('#all_tasks_counter').text(allList.length);
         $('#undone_tasks_counter').text(undoneList.length);
         $('#done_tasks_counter').text(doneList.length);
-        $(this).parent().remove();
+        $('.all_item').remove();
         $('.undone_item').remove();
         $('.done_item').remove();
+        var smth = false;
+        for(var s=0; s<allList.length;s+=1){
+            var allVar = allList[s];
+             for(var u=0; u<doneList.length; u+=1){
+                if(allList[s]===doneList[u]){
+                    smth = true;
+                    break;
+                }
+                else{
+                    smth = false;
+                }
+             } 
+             if(smth){
+                $('#all_tasks').append('<div class="all_item striker">' + allVar + '<div class="del_all"><img src="img/delete-icon.png"></div></div>');
+                smth=false;
+             } 
+             else{
+                $('#all_tasks').append('<div class="all_item">' + allVar + '<div class="del_all"><img src="img/delete-icon.png"></div></div>');
+             }
+        }
         for(var t=0; t<undoneList.length;t+=1){
-             $('#undone_tasks').append('<div class="undone_item">' + undoneList[t] + '<div class="del_all"><img src="img/delete-icon.png"></div></div>');
+             $('#undone_tasks').append('<div class="undone_item">' + undoneList[t] + '</div>');
         }
         for(var b=0; b<doneList.length;b+=1){
              $('#done_tasks').append('<div class="done_item">' + doneList[b] + '</div>');
@@ -226,4 +305,5 @@ $(document).ready(function() {
         }
 
     });
+
 });
