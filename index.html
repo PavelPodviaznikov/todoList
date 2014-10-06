@@ -4,13 +4,18 @@
     <link rel="stylesheet" type="text/css" href="styles.css">
     <link rel="stylesheet" href="jquery-ui.css">
     <script src="https://cdn.firebase.com/js/client/1.0.24/firebase.js"></script>
+    <script src="https://cdn.firebase.com/js/simple-login/1.6.4/firebase-simple-login.js"></script>
     <script type="text/javascript" src="jquery.js"></script>
     <script type="text/javascript" src="jquery/jquery-ui.js"></script>
     <script type="text/javascript" src="script.js"></script>
 </head>
 <body>
     <div id="container">
-        <h2>TODO LIST</h2>
+        <div id="upper">
+            <div id="loginGithub"><img src="images/github.png" id="github"></div>
+            <h2>TODO LIST</h2>
+            <div id="loginItem">LOGIN</div>
+        </div>
         <hr>
             <form name="checkListForm">
                 <input type="text" id="inputItem" placeholder="Input your tasks here"/>
@@ -40,6 +45,12 @@
                 <p>Delete all?</p>
                 <div id="delete">Delete</div>
                 <div id="cancel">Cancel</div>
+            </div>
+            <div id="login_dialog">
+                <p>Login<input type="text" id="email"/></p>
+                <p>Password<input type="password" id="password"/></p>
+                <div id="loginBtn">Sign in</div>
+                <div id="loginCancel">Cancel</div>
             </div>
         </div>
         <div id="bottom_buttons">

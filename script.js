@@ -4,59 +4,87 @@ var allList = [];
 var all_counter;
 var undone_counter;
 var done_counter;
-var fb = new Firebase("https://podviaznikovtodolist.firebaseio.com/");
-var undoneRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/undone");
-var doneRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/done");
-var allRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/all");
+var ref = new Firebase('https://podviaznikovtodolist.firebaseio.com');
 var some;
-
+var userEmail="";
+var userName="";
+var userRef;
+var undoneRef; 
+var doneRef;
+var allRef; 
 
 $(document).ready(function() {
-    $('#container').draggable({
+   //Перетаскивание окна
+   $('#container').draggable({
         revert: true
   });
-    doneRef.once('value', function(allDoneSnap){
-        allDoneSnap.forEach(function(doneSnap){
-            var doneText = doneSnap.child('task').val();
-            doneList.push(doneText);
-            $('#done_tasks').append('<div class="done_item">' + doneText + '</div>');
-            $('#done_tasks_counter').text(doneList.length);
-        });
-    });
-    allRef.once('value', function(allSnap){
-        allSnap.forEach(function(snapshot){
-            var allText = snapshot.child('task').val();
-            allList.push(allText);
-            var some = false;
-            for(var i=0; i<allList.length; i+=1){
-                for(var j=0; j<doneList.length; j+=1){
-                    if(allList[i]===doneList[j]){
-                        some = true;
-                        break;
+   
+   $('#github').on('click', function(){
+        var auth = new FirebaseSimpleLogin(ref, function(error, user) {
+          if (error) {
+            console.log('Authentication error: ', error);
+          } else if (user) {
+            userEmail=user.thirdPartyUserData.email;
+            userName=user.thirdPartyUserData.login;
+            userRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/"+userName);
+            undoneRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/"+userName+"/undone");
+            doneRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/"+userName+"/done");
+            allRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/"+userName+"/all");
+            //Загрузка с БД сделанных заданий
+            doneRef.once('value', function(allDoneSnap){
+                allDoneSnap.forEach(function(doneSnap){
+                    var doneText = doneSnap.child('task').val();
+                    doneList.push(doneText);
+                    $('#done_tasks').append('<div class="done_item">' + doneText + '</div>');
+                    $('#done_tasks_counter').text(doneList.length);
+                });
+            });
+            //Загрузка с БД всех заданий
+            allRef.once('value', function(allSnap){
+                allSnap.forEach(function(snapshot){
+                    var allText = snapshot.child('task').val();
+                    allList.push(allText);
+                    var some = false;
+                    for(var i=0; i<allList.length; i+=1){
+                        for(var j=0; j<doneList.length; j+=1){
+                            if(allList[i]===doneList[j]){
+                                some = true;
+                                break;
+                            }
+                            else{
+                                some = false;
+                            }
+                        }
+                    }
+                    if(some){
+                        $('#all_tasks').append('<div class="all_item striker">'+allText+'<div class="del_all"><img src="img/delete-icon.png"></div></div>');
+                        some=false;
                     }
                     else{
-                        some = false;
+                        $('#all_tasks').append('<div class="all_item">'+allText+'<div class="del_all"><img src="img/delete-icon.png"></div></div>');
                     }
-                }
-            }
-            if(some){
-                $('#all_tasks').append('<div class="all_item striker">'+allText+'<div class="del_all"><img src="img/delete-icon.png"></div></div>');
-                some=false;
-            }
-            else{
-                $('#all_tasks').append('<div class="all_item">'+allText+'<div class="del_all"><img src="img/delete-icon.png"></div></div>');
-            }
-            $('#all_tasks_counter').text(allList.length);
+                    $('#all_tasks_counter').text(allList.length);
+                });
+            });
+            //Загрузка с БД несделанных заданий
+            undoneRef.once('value', function(allUndoneSnap){
+                allUndoneSnap.forEach(function(undoneSnap){
+                    var undoneText = undoneSnap.child('task').val();
+                    undoneList.push(undoneText);
+                    $('#undone_tasks').append('<div class="undone_item">' + undoneText + '<div class="del_all"><img src="img/delete-icon.png"></div></div>');
+                    $('#undone_tasks_counter').text(undoneList.length);
+                });
+            });
+
+          } else {
+            console.log("User is logged out.")
+          }
         });
-    });
-    undoneRef.once('value', function(allUndoneSnap){
-        allUndoneSnap.forEach(function(undoneSnap){
-            var undoneText = undoneSnap.child('task').val();
-            undoneList.push(undoneText);
-            $('#undone_tasks').append('<div class="undone_item">' + undoneText + '</div>');
-            $('#undone_tasks_counter').text(undoneList.length);
-        });
-    });
+        auth.login('github');
+        
+   });
+
+   
     //Работа табок
     $('.tabs .tab-links a').on('click', function(e)  {
         var currentAttrValue = $(this).attr('href');
@@ -99,7 +127,7 @@ $(document).ready(function() {
             undoneRef.push({
                 task: undoneList[undone_counter]
             });
-            $('#undone_tasks').append('<div class="undone_item">' + undoneList[undone_counter] + '</div>');
+            $('#undone_tasks').append('<div class="undone_item">' + undoneList[undone_counter] + '<div class="del_all"><img src="img/delete-icon.png"></div></div>');
             all_counter=all_counter+1;
             undone_counter=undone_counter+1;
             $('#all_tasks_counter').text(allList.length);
@@ -107,7 +135,7 @@ $(document).ready(function() {
             $('#inputItem').val("");
         } 
     });
-    //Добавления зажания ентером
+    //Добавления задания ентером
     $(document).keypress(function(e) {
         if(e.which == 13) {
             e.preventDefault();
@@ -136,7 +164,7 @@ $(document).ready(function() {
                 undoneRef.push({
                     task: undoneList[undone_counter]
                 });
-                $('#undone_tasks').append('<div class="undone_item">' + undoneList[undone_counter] + '</div>');
+                $('#undone_tasks').append('<div class="undone_item">' + undoneList[undone_counter] + '<div class="del_all"><img src="img/delete-icon.png"></div></div>');
                 all_counter=all_counter+1;
                 undone_counter=undone_counter+1;
                 $('#all_tasks_counter').text(allList.length);
@@ -150,8 +178,8 @@ $(document).ready(function() {
             $('#dialog_container').css('display', 'block');
             $('#my_dialog').css('display', 'block');
             $('#delete').on('click', function(){
-                for(var i in allList){
-                    for(var j in doneList){
+                for(var i=0; i<allList.length; i+=1){
+                    for(var j=0; j<doneList.length; j+=1){
                         if(allList[i]===doneList[j]){
                             allList.splice(i,1);
                         }
@@ -172,7 +200,7 @@ $(document).ready(function() {
                 doneList = [];
                 done_counter = 0;
                 $('#done_tasks_counter').text(doneList.length);
-                fb.child("done").remove(); 
+                doneRef.remove(); 
                 $('#dialog_container').css('display', 'none');
                 $('#my_dialog').css('display', 'none');
             });
@@ -181,7 +209,7 @@ $(document).ready(function() {
                 $('#my_dialog').css('display', 'none');
             });
         });    
-    //Определение сделанных заданий
+    //Определение сделанных заданий c all_tasks
     $(document).on('click','#all_tasks .all_item', function(){
         done_counter=doneList.length;
         var task = $(this).text();
@@ -200,7 +228,7 @@ $(document).ready(function() {
         $('.undone_item').remove();
         undoneRef.remove();
         for(var k=0; k<undoneList.length; k+=1){
-            $('#undone_tasks').append('<div class="undone_item">' + undoneList[k] + '</div>');
+            $('#undone_tasks').append('<div class="undone_item">' + undoneList[k] + '<div class="del_all"><img src="img/delete-icon.png"></div></div>');
             undoneRef.push({
                 task: undoneList[k]
             });
@@ -224,6 +252,67 @@ $(document).ready(function() {
             $('#done_tasks_counter').text(doneList.length);
         }
         
+    }); 
+    //Определение сделанных заданий c undone_tasks
+    $(document).on('click','#undone_tasks .undone_item', function(){
+        done_counter=doneList.length;
+        var task = $(this).text();
+        for(var j=0; j<undoneList.length; j+=1){
+            if(undoneList[j]===task){
+                undoneList.splice(j,1);
+                $('#undone_tasks_counter').text(undoneList.length);  
+            }    
+        }
+        $('.undone_item').remove();
+        undoneRef.remove();
+        for(var k=0; k<undoneList.length; k+=1){
+            $('#undone_tasks').append('<div class="undone_item">' + undoneList[k] + '<div class="del_all"><img src="img/delete-icon.png"></div></div>');
+            undoneRef.push({
+                task: undoneList[k]
+            });
+        }
+        
+        var isInList = false;
+        for(var m in doneList){
+            if(doneList[m]===task){
+                isInList=true;
+            }
+        }
+        if(isInList){
+            return;
+        }
+        else{
+            doneList.push(task);
+            doneRef.push({
+                task: doneList[done_counter]
+            });
+            $('#done_tasks').append('<div class="done_item">' + doneList[done_counter] + '</div>');
+            done_counter+=1;
+            $('#done_tasks_counter').text(doneList.length);
+        }
+
+        $('.all_item').remove();
+        var smth = false;
+        for(var s=0; s<allList.length;s+=1){
+            var allVar = allList[s];
+             for(var u=0; u<doneList.length; u+=1){
+                if(allList[s]===doneList[u]){
+                    smth = true;
+                    break;
+                }
+                else{
+                    smth = false;
+                }
+             } 
+             if(smth){
+                $('#all_tasks').append('<div class="all_item striker">' + allVar + '<div class="del_all"><img src="img/delete-icon.png"></div></div>');
+                smth=false;
+             } 
+             else{
+                $('#all_tasks').append('<div class="all_item">' + allVar + '<div class="del_all"><img src="img/delete-icon.png"></div></div>');
+             }
+        }
+
     }); 
 
     /*$(document).on('click','.striker', function(){
@@ -280,7 +369,7 @@ $(document).ready(function() {
              }
         }
         for(var t=0; t<undoneList.length;t+=1){
-             $('#undone_tasks').append('<div class="undone_item">' + undoneList[t] + '</div>');
+             $('#undone_tasks').append('<div class="undone_item">' + undoneList[t] + '<div class="del_all"><img src="img/delete-icon.png"></div></div>');
         }
         for(var b=0; b<doneList.length;b+=1){
              $('#done_tasks').append('<div class="done_item">' + doneList[b] + '</div>');
@@ -304,6 +393,14 @@ $(document).ready(function() {
             }); 
         }
 
+    });
+    $('#loginItem').on('click', function(){
+        $('#dialog_container').css('display', 'block');
+        $('#login_dialog').css('display', 'block');
+    });
+    $('#loginCancel').on('click', function(){
+        $('#dialog_container').css('display', 'none');
+        $('#login_dialog').css('display', 'none');
     });
 
 });
