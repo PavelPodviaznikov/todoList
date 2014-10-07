@@ -35,6 +35,21 @@ body{
     right: 16;
 }
 
+#logoutItem{
+    position: absolute;
+    right: 20;
+    top: 28;
+    font-family: arial;
+    font-size: 10px;
+    cursor: pointer;
+    display: none;
+}
+#logoutItem:hover{
+    font-size: 14px;
+    top:26;
+    right: 16;
+}
+
 #loginBtn{
     height: 30px;
     width: 100px;

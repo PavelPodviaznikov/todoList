@@ -5,19 +5,20 @@ var all_counter;
 var undone_counter;
 var done_counter;
 var ref = new Firebase('https://podviaznikovtodolist.firebaseio.com');
-var some;
-var userEmail="";
-var userName="";
-var userRef;
-var undoneRef; 
-var doneRef;
-var allRef; 
+var userEmail="anonymus@email.com";
+var userName="anonymus";
+var userAutRef;
+var undoneAutRef; 
+var doneAutRef;
+var allAutRef; 
+var undoneRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/anonymus/undone"); 
+var doneRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/anonymus/done");
+var allRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/anonymus/all"); 
+var anonymusRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/anonymus");
+var isAuthorized = false;
 
 $(document).ready(function() {
-   //Перетаскивание окна
-   $('#container').draggable({
-        revert: true
-  });
+    anonymusRef.remove();
    
    $('#github').on('click', function(){
         var auth = new FirebaseSimpleLogin(ref, function(error, user) {
@@ -26,21 +27,39 @@ $(document).ready(function() {
           } else if (user) {
             userEmail=user.thirdPartyUserData.email;
             userName=user.thirdPartyUserData.login;
-            userRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/"+userName);
-            undoneRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/"+userName+"/undone");
-            doneRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/"+userName+"/done");
-            allRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/"+userName+"/all");
+            $('#loginItem').css('display', 'none');
+            $('#logoutItem').css('display', 'block');
+            $('#github').css('display', 'none');
+            $('#loginGithub').append('<p id="userName">'+userName+'</p>');
+            anonymusRef.remove();
+            doneList = [];
+            undoneList = [];
+            allList = [];
+            $('.all_item').remove();
+            $('.undone_item').remove();
+            $('.done_item').remove();
+            $('#undone_tasks_counter').text(undoneList.length);
+            $('#done_tasks_counter').text(doneList.length);
+            $('#all_tasks_counter').text(allList.length);
+            isAuthorized = true;
+            userAutRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/"+userName);
+            undoneAutRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/"+userName+"/undone");
+            doneAutRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/"+userName+"/done");
+            allAutRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/"+userName+"/all");
             //Загрузка с БД сделанных заданий
-            doneRef.once('value', function(allDoneSnap){
+            doneAutRef.once('value', function(allDoneSnap){
+                doneList = [];
                 allDoneSnap.forEach(function(doneSnap){
                     var doneText = doneSnap.child('task').val();
                     doneList.push(doneText);
                     $('#done_tasks').append('<div class="done_item">' + doneText + '</div>');
                     $('#done_tasks_counter').text(doneList.length);
                 });
+
             });
             //Загрузка с БД всех заданий
-            allRef.once('value', function(allSnap){
+            allAutRef.once('value', function(allSnap){
+                allList = [];
                 allSnap.forEach(function(snapshot){
                     var allText = snapshot.child('task').val();
                     allList.push(allText);
@@ -67,7 +86,8 @@ $(document).ready(function() {
                 });
             });
             //Загрузка с БД несделанных заданий
-            undoneRef.once('value', function(allUndoneSnap){
+            undoneAutRef.once('value', function(allUndoneSnap){
+                undoneList = [];
                 allUndoneSnap.forEach(function(undoneSnap){
                     var undoneText = undoneSnap.child('task').val();
                     undoneList.push(undoneText);
@@ -81,8 +101,7 @@ $(document).ready(function() {
           }
         });
         auth.login('github');
-        
-   });
+    });
 
    
     //Работа табок
@@ -118,15 +137,25 @@ $(document).ready(function() {
         }
         else{
             allList[all_counter] = $('#inputItem').val();
-            allRef.push({
-                task: allList[all_counter]
-            });
-            $('#all_tasks').append('<div class="all_item">' + allList[all_counter] + '<div class="del_all"><img src="img/delete-icon.png"></div></div>');
-            //////////////////////////////////////
             undoneList[undone_counter] = $('#inputItem').val();
-            undoneRef.push({
-                task: undoneList[undone_counter]
-            });
+            if(isAuthorized){
+                allAutRef.push({
+                    task: allList[all_counter]
+                });
+                undoneAutRef.push({
+                    task: undoneList[undone_counter]
+                });
+            }
+            else{
+                allRef.push({
+                    task: allList[all_counter]
+                });
+
+                undoneRef.push({
+                    task: undoneList[undone_counter]
+                });
+            }
+            $('#all_tasks').append('<div class="all_item">' + allList[all_counter] + '<div class="del_all"><img src="img/delete-icon.png"></div></div>');
             $('#undone_tasks').append('<div class="undone_item">' + undoneList[undone_counter] + '<div class="del_all"><img src="img/delete-icon.png"></div></div>');
             all_counter=all_counter+1;
             undone_counter=undone_counter+1;
@@ -155,22 +184,32 @@ $(document).ready(function() {
             }
             else{
                 allList[all_counter] = $('#inputItem').val();
-                allRef.push({
-                    task: allList[all_counter]
-                });
-                $('#all_tasks').append('<div class="all_item">' + allList[all_counter] + '<div class="del_all"><img src="img/delete-icon.png"></div></div>');
-                //////////////////////////////////////
                 undoneList[undone_counter] = $('#inputItem').val();
-                undoneRef.push({
-                    task: undoneList[undone_counter]
-                });
+                if(isAuthorized){
+                    allAutRef.push({
+                        task: allList[all_counter]
+                    });
+                    undoneAutRef.push({
+                        task: undoneList[undone_counter]
+                    });
+                }
+                else{
+                    allRef.push({
+                        task: allList[all_counter]
+                    });
+
+                    undoneRef.push({
+                        task: undoneList[undone_counter]
+                    });
+                }
+                $('#all_tasks').append('<div class="all_item">' + allList[all_counter] + '<div class="del_all"><img src="img/delete-icon.png"></div></div>');
                 $('#undone_tasks').append('<div class="undone_item">' + undoneList[undone_counter] + '<div class="del_all"><img src="img/delete-icon.png"></div></div>');
                 all_counter=all_counter+1;
                 undone_counter=undone_counter+1;
                 $('#all_tasks_counter').text(allList.length);
                 $('#undone_tasks_counter').text(undoneList.length);
                 $('#inputItem').val("");
-            } 
+            }   
         }
     });
     //Удаление сделанных заданий
@@ -185,12 +224,23 @@ $(document).ready(function() {
                         }
                     }
                 }
-                allRef.remove();
-                for(var k=0; k<allList.length;k+=1){
-                    allRef.push({
-                        task: allList[k]
-                    }); 
+                if(isAuthorized){
+                    allAutRef.remove();
+                    for(var e=0; e<allList.length;e+=1){
+                        allAutRef.push({
+                            task: allList[e]
+                        }); 
+                    }
                 }
+                else{
+                    allRef.remove();
+                    for(var k=0; k<allList.length;k+=1){
+                        allRef.push({
+                            task: allList[k]
+                        }); 
+                    }  
+                }
+                
                 $('#all_tasks').empty('.all_item');
                 for(var b=0; b<allList.length;b+=1){
                      $('#all_tasks').append('<div class="all_item">' + allList[b] + '<div class="del_all"><img src="img/delete-icon.png"></div></div>');
@@ -200,7 +250,13 @@ $(document).ready(function() {
                 doneList = [];
                 done_counter = 0;
                 $('#done_tasks_counter').text(doneList.length);
-                doneRef.remove(); 
+                if(isAuthorized){
+                    doneAutRef.remove()
+                }
+                else{
+                    doneRef.remove(); 
+                }
+                
                 $('#dialog_container').css('display', 'none');
                 $('#my_dialog').css('display', 'none');
             });
@@ -226,13 +282,25 @@ $(document).ready(function() {
             }    
         }
         $('.undone_item').remove();
-        undoneRef.remove();
-        for(var k=0; k<undoneList.length; k+=1){
-            $('#undone_tasks').append('<div class="undone_item">' + undoneList[k] + '<div class="del_all"><img src="img/delete-icon.png"></div></div>');
-            undoneRef.push({
-                task: undoneList[k]
-            });
+        if(isAuthorized){
+            undoneAutRef.remove();
+            for(var t=0; t<undoneList.length; t+=1){
+                $('#undone_tasks').append('<div class="undone_item">' + undoneList[t] + '<div class="del_all"><img src="img/delete-icon.png"></div></div>');
+                undoneAutRef.push({
+                    task: undoneList[t]
+                });
+            }
         }
+        else{
+            undoneRef.remove();
+            for(var k=0; k<undoneList.length; k+=1){
+                $('#undone_tasks').append('<div class="undone_item">' + undoneList[k] + '<div class="del_all"><img src="img/delete-icon.png"></div></div>');
+                undoneRef.push({
+                    task: undoneList[k]
+                });
+            } 
+        }
+       
         var isInList = false;
         for(var m in doneList){
             if(doneList[m]===task){
@@ -244,9 +312,17 @@ $(document).ready(function() {
         }
         else{
             doneList.push(task);
-            doneRef.push({
-                task: doneList[done_counter]
-            });
+            if(isAuthorized){
+                doneAutRef.push({
+                    task: doneList[done_counter]
+                });
+            }
+            else{
+                doneRef.push({
+                    task: doneList[done_counter]
+                });
+            }
+            
             $('#done_tasks').append('<div class="done_item">' + doneList[done_counter] + '</div>');
             done_counter+=1;
             $('#done_tasks_counter').text(doneList.length);
@@ -264,12 +340,26 @@ $(document).ready(function() {
             }    
         }
         $('.undone_item').remove();
-        undoneRef.remove();
+        if(isAuthorized){
+            undoneAutRef.remove();
+        }
+        else{
+            undoneRef.remove();
+        }
+        
         for(var k=0; k<undoneList.length; k+=1){
             $('#undone_tasks').append('<div class="undone_item">' + undoneList[k] + '<div class="del_all"><img src="img/delete-icon.png"></div></div>');
-            undoneRef.push({
-                task: undoneList[k]
-            });
+            if(isAuthorized){
+                undoneAutRef.push({
+                    task: undoneList[k]
+                });
+            }
+            else{
+                undoneRef.push({
+                    task: undoneList[k]
+               });
+            }
+            
         }
         
         var isInList = false;
@@ -283,9 +373,17 @@ $(document).ready(function() {
         }
         else{
             doneList.push(task);
-            doneRef.push({
-                task: doneList[done_counter]
-            });
+            if(isAuthorized){
+                doneAutRef.push({
+                    task: doneList[done_counter]
+                });
+            }
+            else{
+                doneRef.push({
+                    task: doneList[done_counter]
+                });
+            }
+            
             $('#done_tasks').append('<div class="done_item">' + doneList[done_counter] + '</div>');
             done_counter+=1;
             $('#done_tasks_counter').text(doneList.length);
@@ -374,24 +472,47 @@ $(document).ready(function() {
         for(var b=0; b<doneList.length;b+=1){
              $('#done_tasks').append('<div class="done_item">' + doneList[b] + '</div>');
         }
-        allRef.remove();
-        undoneRef.remove();
-        doneRef.remove();
-        for(var k=0; k<allList.length;k+=1){
-            allRef.push({
-                task: allList[k]
-            }); 
+        if(isAuthorized){
+            allAutRef.remove();
+            undoneAutRef.remove();
+            doneAutRef.remove();
+            for(var k=0; k<allList.length;k+=1){
+                allAutRef.push({
+                    task: allList[k]
+                }); 
+            }
+            for(var m=0; m<undoneList.length;m+=1){
+                undoneAutRef.push({
+                    task: undoneList[m]
+                }); 
+            }
+            for(var p=0; p<doneList.length;p+=1){
+                doneAutRef.push({
+                    task: doneList[p]
+                }); 
+            }
         }
-        for(var m=0; m<undoneList.length;m+=1){
-            undoneRef.push({
-                task: undoneList[m]
-            }); 
+        else{
+            allRef.remove();
+            undoneRef.remove();
+            doneRef.remove();
+            for(var q=0; q<allList.length;q+=1){
+                allRef.push({
+                    task: allList[q]
+                }); 
+            }
+            for(var w=0; w<undoneList.length;w+=1){
+                undoneRef.push({
+                    task: undoneList[w]
+                }); 
+            }
+            for(var e=0; e<doneList.length;e+=1){
+                doneRef.push({
+                    task: doneList[e]
+                }); 
+            }
         }
-        for(var p=0; p<doneList.length;p+=1){
-            doneRef.push({
-                task: doneList[p]
-            }); 
-        }
+        
 
     });
     $('#loginItem').on('click', function(){
@@ -401,6 +522,23 @@ $(document).ready(function() {
     $('#loginCancel').on('click', function(){
         $('#dialog_container').css('display', 'none');
         $('#login_dialog').css('display', 'none');
+    });
+    $('#logoutItem').on('click', function(){
+        $('#logoutItem').css('display', 'none');
+        $('#loginItem').css('display', 'block');
+        ref.unauth();
+        doneList = [];
+        undoneList = [];
+        allList = [];
+        $('.all_item').remove();
+        $('.undone_item').remove();
+        $('.done_item').remove();
+        $('#undone_tasks_counter').text(undoneList.length);
+        $('#done_tasks_counter').text(doneList.length);
+        $('#all_tasks_counter').text(allList.length);
+        $('#userName').empty();
+        $('#github').css('display', 'inline');
+        isAuthorized = false;
     });
 
 });
