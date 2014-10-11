@@ -17,123 +17,106 @@ var doneRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/anonymus
 var allRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/anonymus/tasks/all"); 
 var anonymusRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/anonymus");
 var isAuthorized = false;
+var myUser;
 
-
-$(window).unload(function () {
-            ref.logout();
-        });
 $(document).ready(function() {
-    var auth = new FirebaseSimpleLogin(ref, function(error, user) {
-            
-        });
-    
     anonymusRef.remove();
-   
-   $('#github').on('click', function(){ 
-        ref.login("github", function(error, user){
+    var auth = new FirebaseSimpleLogin(ref, function(error, user) {
             if(error){
                 console.log(error);
             }
             else if(user){
-                userName=user.thirdPartyUserData.login;
-            }
-            else{
-                console.log("User logout!");
-            }
-        });
-    });
-
-   /*$(window).bind('beforeunload',function(){
-
-     //save info somewhere
-    
-    return 'are you sure you want to leave?';
-
-    });*/
-        
-        /*  if (error!==null) {
-            console.log('Authentication error: ', error);
-          } else if (user!==null) {
-            isAuthorized = true;   
-            userEmail=user.thirdPartyUserData.email;
-            userName=user.thirdPartyUserData.login;
-            $('#loginItem').css('display', 'none');
-            $('#logoutItem').css('display', 'block');
-            $('#github').css('display', 'none');
-            $('#loginGithub').append('<p id="userName">'+userName+'</p>');
-            anonymusRef.remove();
-            doneList = [];
-            undoneList = [];
-            allList = [];
-            $('.all_item').remove();
-            $('.undone_item').remove();
-            $('.done_item').remove();
-            $('#undone_tasks_counter').text(undoneList.length);
-            $('#done_tasks_counter').text(doneList.length);
-            $('#all_tasks_counter').text(allList.length);
-            isAuthorized = true;
-            userAutRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/"+userName);
-            undoneAutRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/"+userName+"/tasks/undone");
-            doneAutRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/"+userName+"/tasks/done");
-            allAutRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/"+userName+"/tasks/all");
-            //Загрузка с БД сделанных заданий
-            doneAutRef.once('value', function(allDoneSnap){
+                myUser = user;
+                isAuthorized = true;   
+                userEmail=user.thirdPartyUserData.email;
+                userName=user.thirdPartyUserData.name;
+                userName=userName.replace(" ", "");
+                $('#loginItem').css('display', 'none');
+                $('#logoutItem').css('display', 'block');
+                $('#github').css('display', 'none');
+                $('#google').css('display', 'none');
+                $('#loginGithub').append('<p id="userName">'+user.displayName+'</p>');
+                anonymusRef.remove();
                 doneList = [];
-                allDoneSnap.forEach(function(doneSnap){
-                    var doneText = doneSnap.child('task').val();
-                    doneList.push(doneText);
-                    $('#done_tasks').append('<div class="done_item">' + doneText + '</div>');
-                    $('#done_tasks_counter').text(doneList.length);
-                });
-
-            });
-            //Загрузка с БД всех заданий
-            allAutRef.once('value', function(allSnap){
+                undoneList = [];
                 allList = [];
-                allSnap.forEach(function(snapshot){
-                    var allText = snapshot.child('task').val();
-                    allList.push(allText);
-                    var some = false;
-                    for(var i=0; i<allList.length; i+=1){
-                        for(var j=0; j<doneList.length; j+=1){
-                            if(allList[i]===doneList[j]){
-                                some = true;
-                                break;
-                            }
-                            else{
-                                some = false;
+                $('.all_item').remove();
+                $('.undone_item').remove();
+                $('.done_item').remove();
+                $('#undone_tasks_counter').text(undoneList.length);
+                $('#done_tasks_counter').text(doneList.length);
+                $('#all_tasks_counter').text(allList.length);
+                isAuthorized = true;
+                userAutRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/"+userName);
+                undoneAutRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/"+userName+"/tasks/undone");
+                doneAutRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/"+userName+"/tasks/done");
+                allAutRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/"+userName+"/tasks/all");
+                //Загрузка с БД сделанных заданий
+                doneAutRef.once('value', function(allDoneSnap){
+                    doneList = [];
+                    allDoneSnap.forEach(function(doneSnap){
+                        var doneText = doneSnap.child('task').val();
+                        doneList.push(doneText);
+                        $('#done_tasks').append('<div class="done_item">' + doneText + '</div>');
+                        $('#done_tasks_counter').text(doneList.length);
+                    });
+
+                });
+                //Загрузка с БД всех заданий
+                allAutRef.once('value', function(allSnap){
+                    allList = [];
+                    allSnap.forEach(function(snapshot){
+                        var allText = snapshot.child('task').val();
+                        allList.push(allText);
+                        var some = false;
+                        for(var i=0; i<allList.length; i+=1){
+                            for(var j=0; j<doneList.length; j+=1){
+                                if(allList[i]===doneList[j]){
+                                    some = true;
+                                    break;
+                                }
+                                else{
+                                    some = false;
+                                }
                             }
                         }
-                    }
-                    if(some){
-                        $('#all_tasks').append('<div class="all_item striker">'+allText+'<div class="del_all"><img src="img/delete-icon.png"></div></div>');
-                        some=false;
-                    }
-                    else{
-                        $('#all_tasks').append('<div class="all_item">'+allText+'<div class="del_all"><img src="img/delete-icon.png"></div></div>');
-                    }
-                    $('#all_tasks_counter').text(allList.length);
+                        if(some){
+                            $('#all_tasks').append('<div class="all_item striker">'+allText+'<div class="del_all"><img src="img/delete-icon.png"></div></div>');
+                            some=false;
+                        }
+                        else{
+                            $('#all_tasks').append('<div class="all_item">'+allText+'<div class="del_all"><img src="img/delete-icon.png"></div></div>');
+                        }
+                        $('#all_tasks_counter').text(allList.length);
+                    });
                 });
-            });
-            //Загрузка с БД несделанных заданий
-            undoneAutRef.once('value', function(allUndoneSnap){
-                undoneList = [];
-                allUndoneSnap.forEach(function(undoneSnap){
-                    var undoneText = undoneSnap.child('task').val();
-                    undoneList.push(undoneText);
-                    $('#undone_tasks').append('<div class="undone_item">' + undoneText + '<div class="del_all"><img src="img/delete-icon.png"></div></div>');
-                    $('#undone_tasks_counter').text(undoneList.length);
+                //Загрузка с БД несделанных заданий
+                undoneAutRef.once('value', function(allUndoneSnap){
+                    undoneList = [];
+                    allUndoneSnap.forEach(function(undoneSnap){
+                        var undoneText = undoneSnap.child('task').val();
+                        undoneList.push(undoneText);
+                        $('#undone_tasks').append('<div class="undone_item">' + undoneText + '<div class="del_all"><img src="img/delete-icon.png"></div></div>');
+                        $('#undone_tasks_counter').text(undoneList.length);
+                    });
                 });
-            });
+            }
+            else{
+                console.log("logout");
+            }
+        });
 
-          } else {
-            console.log("User is logged out.")
-          }
-        });*/
-        
 
-    $('#google').on('click', function(){;
+   $('#github').on('click', function(){
+        auth.login('github');
+    });  
+
+    $('#google').on('click', function(){
         auth.login('google');
+    });
+
+    $(window).unload(function () {
+        auth.logout();
     });
 
    
@@ -571,6 +554,7 @@ $(document).ready(function() {
         $('#all_tasks_counter').text(allList.length);
         $('#userName').remove();
         $('#github').css('display', 'inline');
+        $('#google').css('display', 'inline');
         isAuthorized = false;
     });
 

@@ -33,6 +33,7 @@ body{
 #userName{
     position: absolute;
     top: -9px;
+    width:120px;
 }
 
 #loginItem{
