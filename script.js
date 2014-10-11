@@ -4,27 +4,57 @@ var allList = [];
 var all_counter;
 var undone_counter;
 var done_counter;
-var ref = new Firebase('https://podviaznikovtodolist.firebaseio.com');
 var userEmail="anonymus@email.com";
 var userName="anonymus";
-var userAutRef;
-var undoneAutRef; 
-var doneAutRef;
-var allAutRef; 
-var undoneRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/anonymus/undone"); 
-var doneRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/anonymus/done");
-var allRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/anonymus/all"); 
+var userPassword;
+var userAutRef="";
+var undoneAutRef=""; 
+var doneAutRef="";
+var allAutRef=""; 
+var ref = new Firebase('https://podviaznikovtodolist.firebaseio.com');
+var undoneRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/anonymus/tasks/undone"); 
+var doneRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/anonymus/tasks/done");
+var allRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/anonymus/tasks/all"); 
 var anonymusRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/anonymus");
 var isAuthorized = false;
 
+
+$(window).unload(function () {
+            ref.logout();
+        });
 $(document).ready(function() {
+    var auth = new FirebaseSimpleLogin(ref, function(error, user) {
+            
+        });
+    
     anonymusRef.remove();
    
-   $('#github').on('click', function(){
-        var auth = new FirebaseSimpleLogin(ref, function(error, user) {
-          if (error) {
+   $('#github').on('click', function(){ 
+        ref.login("github", function(error, user){
+            if(error){
+                console.log(error);
+            }
+            else if(user){
+                userName=user.thirdPartyUserData.login;
+            }
+            else{
+                console.log("User logout!");
+            }
+        });
+    });
+
+   /*$(window).bind('beforeunload',function(){
+
+     //save info somewhere
+    
+    return 'are you sure you want to leave?';
+
+    });*/
+        
+        /*  if (error!==null) {
             console.log('Authentication error: ', error);
-          } else if (user) {
+          } else if (user!==null) {
+            isAuthorized = true;   
             userEmail=user.thirdPartyUserData.email;
             userName=user.thirdPartyUserData.login;
             $('#loginItem').css('display', 'none');
@@ -43,9 +73,9 @@ $(document).ready(function() {
             $('#all_tasks_counter').text(allList.length);
             isAuthorized = true;
             userAutRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/"+userName);
-            undoneAutRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/"+userName+"/undone");
-            doneAutRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/"+userName+"/done");
-            allAutRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/"+userName+"/all");
+            undoneAutRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/"+userName+"/tasks/undone");
+            doneAutRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/"+userName+"/tasks/done");
+            allAutRef = new Firebase("https://podviaznikovtodolist.firebaseio.com/"+userName+"/tasks/all");
             //Загрузка с БД сделанных заданий
             doneAutRef.once('value', function(allDoneSnap){
                 doneList = [];
@@ -99,8 +129,11 @@ $(document).ready(function() {
           } else {
             console.log("User is logged out.")
           }
-        });
-        auth.login('github');
+        });*/
+        
+
+    $('#google').on('click', function(){;
+        auth.login('google');
     });
 
    
@@ -526,7 +559,7 @@ $(document).ready(function() {
     $('#logoutItem').on('click', function(){
         $('#logoutItem').css('display', 'none');
         $('#loginItem').css('display', 'block');
-        ref.unauth();
+        userName=" ";
         doneList = [];
         undoneList = [];
         allList = [];
@@ -536,7 +569,7 @@ $(document).ready(function() {
         $('#undone_tasks_counter').text(undoneList.length);
         $('#done_tasks_counter').text(doneList.length);
         $('#all_tasks_counter').text(allList.length);
-        $('#userName').empty();
+        $('#userName').remove();
         $('#github').css('display', 'inline');
         isAuthorized = false;
     });

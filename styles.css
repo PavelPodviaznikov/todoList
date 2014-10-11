@@ -20,6 +20,20 @@ body{
     left: 10;
     top: 18;
 }
+#google{
+    display: inline;
+    height: 25px;
+    cursor: pointer;
+}
+#loginGoogle{
+    position: absolute;
+    left: 40;
+    top: 18;
+}
+#userName{
+    position: absolute;
+    top: -9px;
+}
 
 #loginItem{
     position: absolute;
